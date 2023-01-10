@@ -3,25 +3,12 @@ package com.example.newgame;
 import javafx.scene.image.Image;
 import javafx.scene.shape.Rectangle;
 
-    public class Player {
+public class Player extends Entity{
 
-        Image image;
-        private double positionX;
-        private double positionY;
+        Image image = new Image("gangster1.png");
 
-        public Player ( Image image, double positionX, double positionY) {
-
-            this.image = image;
-            this.positionX = positionX;
-            this.positionY = positionY;
-        }
-
-        public double getPositionY() {
-            return positionY;
-        }
-
-        public void setPositionY(double positionY) {
-            this.positionY = positionY;
+        public Player(double positionX, double positionY ) {
+            super(positionX, positionY);
         }
 
         public Image getImage() {
@@ -31,16 +18,7 @@ import javafx.scene.shape.Rectangle;
         public void setImage(Image image) {
             this.image = image;
         }
-
-        public double getPositionX() {
-            return positionX;
-        }
-
-        public void setPositionX(double positionX) {
-            this.positionX = positionX;
-        }
-
-        //public Rectangle rec = new Rectangle(image.getWidth(),image.getHeight());
+    public Rectangle rec = new Rectangle(image.getWidth(),image.getHeight());
     }
 
 

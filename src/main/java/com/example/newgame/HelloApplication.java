@@ -26,8 +26,9 @@ public class HelloApplication extends Application {
     Image background = new Image("background.jpg");
     private boolean is2ndImage = true;
 
-    Player player = new Player(firstPosition,20,500);
+    Player player = new Player(20,500);
     int speed = 10;
+    Bullet bullet = new Bullet(100,100);
 
     public void start(Stage stage) throws IOException {
         stage.setTitle("Hello");
@@ -38,8 +39,9 @@ public class HelloApplication extends Application {
 
         GraphicsContext gc = canvas.getGraphicsContext2D();
 
-        Timeline tl = new Timeline(new KeyFrame(Duration.millis(100), e -> run(gc)));
+        Timeline tl = new Timeline(new KeyFrame(Duration.millis(250), e -> run(gc)));
         tl.setCycleCount(Timeline.INDEFINITE);
+
 
         Scene scene = new Scene(new StackPane(canvas));
         scene.addEventHandler(KeyEvent.KEY_PRESSED, keyEvent -> {
@@ -52,7 +54,11 @@ public class HelloApplication extends Application {
             }
             else if (keyEvent.getCode() == KeyCode.W || keyEvent.getCode() == KeyCode.SPACE) {
                 player.setPositionY(player.getPositionY() - speed);
-            };
+            }
+            else if (keyEvent.getCode() == KeyCode.CONTROL){
+
+            }
+
         });
             tl.play();
             stage.setScene(scene);
@@ -72,6 +78,7 @@ public class HelloApplication extends Application {
 
         gc.drawImage(player.getImage(), player.getPositionX(), player.getPositionY());
 
+        //gc.drawImage(, 100, 200);
     }
 
     public static void main(String[] args) {launch();}
