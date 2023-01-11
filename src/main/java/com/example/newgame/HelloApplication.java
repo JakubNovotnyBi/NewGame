@@ -12,6 +12,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -24,12 +25,15 @@ public class HelloApplication extends Application {
     Image firstPosition = new Image("gangster1.png");
     Image secondPosition = new Image("gangster2.png");
     Image background = new Image("background.jpg");
+    Image bulletImage = new Image("bullet.png");
+    Image ammoImage = new Image("bullet2.png");
+
     private boolean is2ndImage = true;
 
     Player player = new Player(20,500);
     int speed = 10;
-    Bullet bullet = new Bullet(100,100);
-
+    Bullet bullet = new Bullet(bulletImage,100,100);
+    Bullet ammo = new Bullet(ammoImage, width - ammoImage.getWidth()-30, ammoImage.getHeight());
     public void start(Stage stage) throws IOException {
         stage.setTitle("Hello");
         stage.setResizable(false);
@@ -78,8 +82,13 @@ public class HelloApplication extends Application {
 
         gc.drawImage(player.getImage(), player.getPositionX(), player.getPositionY());
 
-        //gc.drawImage(, 100, 200);
-    }
+        gc.drawImage(ammo.getImage(), ammo.getPositionX(), ammo.getPositionY());
 
+        //gc.drawImage(, 100, 200);
+        gc.setFill(Color.WHITE);
+        gc.setFont(new Font(15));
+        gc.fillText("AMMO", ammo.getPositionX()-50, 30);
+
+    }
     public static void main(String[] args) {launch();}
     }
