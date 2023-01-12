@@ -5,7 +5,7 @@ import javafx.scene.shape.Rectangle;
 
 
 public class Entity{
-        //Image image;
+        Image image;
         private double positionX;
         private double positionY;
 
