@@ -37,15 +37,20 @@ public class HelloApplication extends Application {
     Bullet bullet = new Bullet(bulletImage, player.getPositionX()+player.getImage().getWidth(), player.getPositionY()+player.getImage().getHeight()/2);
     Bullet ammo = new Bullet(ammoImage, width - ammoImage.getWidth()-60, ammoImage.getHeight()-5);
 
-    double xBackground = 0;
-    int speed = 10;
-
+    private double xBackground = 0;
+    private int speed = 10;
+    private int vspeed = 0;
+    private double lastGroundPosition = 0;
+    public final static int MAXYPOS = 420;
+    public final static int MINYPOS = 360;
+    public final static int MAXAMMO = 9;
+    private int currentAmmo = MAXAMMO;
 
     private boolean is2ndImage = true;
     private boolean is2ndImage2 = true;
     private boolean right = true;
-
     private boolean inAirBullet = false;
+    private boolean inAir = false;
 
     public void start(Stage stage) throws IOException {
         stage.setTitle("Shoot-game");
@@ -95,24 +100,41 @@ public class HelloApplication extends Application {
                     }
                 }
             }
-            else if (keyEvent.getCode() == KeyCode.W || keyEvent.getCode() == KeyCode.SPACE) {
+            else if (keyEvent.getCode() == KeyCode.W ) {
+                if (player.getPositionY()-speed >= MINYPOS && !inAir)
                 player.setPositionY(player.getPositionY() - speed);
             }
+
+            else if (keyEvent.getCode() == KeyCode.S ) {
+                if (player.getPositionY() + speed <= MAXYPOS && !inAir)
+                player.setPositionY(player.getPositionY() + speed);
+            }
+
+
+            else if (keyEvent.getCode() == KeyCode.SPACE) {
+                if (!inAir) {
+                    vspeed = -20;
+                    inAir = true;
+                    lastGroundPosition = player.getPositionY();
+                }
+            }
+
+            else if (keyEvent.getCode() == KeyCode.R){
+                currentAmmo = MAXAMMO;
+            }
+
+
+
             else if (keyEvent.getCode() == KeyCode.CONTROL){
-                    if (right) {
-                        if (!inAirBullet) {
+
+                        if (!inAirBullet && currentAmmo > 0) {
                             inAirBullet = true;
                             bulletTime.play();
-                            bullet.setPositionX(player.getPositionX() + player.getImage().getWidth());
+                            currentAmmo--;
+                            bullet.setPositionX(player.getPositionX() + (right ? player.getImage().getWidth() : -15));
+                            bullet.setPositionY(player.getPositionY()+player.getImage().getHeight()/2);
                         }
-                    }
-                    else {
-                        if (!inAirBullet) {
-                            inAirBullet = true;
-                            bulletTime.play();
-                            bullet.setPositionX(player.getPositionX()-15);
-                        }
-                    }
+
 
             }
 
@@ -148,6 +170,17 @@ public class HelloApplication extends Application {
             player.setImage(is2ndImage2 ? firstPositionL : secondPositionL);
             is2ndImage2 = !is2ndImage2;
         }
+
+        if (inAir){
+            vspeed += 2;
+            player.setPositionY(player.getPositionY()+vspeed);
+            if (player.getPositionY()>=lastGroundPosition) {
+                inAir = false;
+                vspeed = 0;
+                player.setPositionY(lastGroundPosition);
+            }
+        }
+
         gc.drawImage(player.getImage(), player.getPositionX(), player.getPositionY());
         gc.drawImage(ammo.getImage(), ammo.getPositionX(), ammo.getPositionY());
 
@@ -156,29 +189,19 @@ public class HelloApplication extends Application {
         gc.setFont(new Font(20));
         gc.fillText("AMMO", ammo.getPositionX()-75, ammo.getPositionY()+15);
         gc.setFont(new Font(20));
-        gc.fillText("∞/∞", ammo.getPositionX()+15, ammo.getPositionY()+15);
+        gc.fillText(currentAmmo+"/∞", ammo.getPositionX()+15, ammo.getPositionY()+15);
 
     }
     private void run1(GraphicsContext gc){
 
-        if (right) {
-            if (inAirBullet && bullet.getPositionX() + bullet.getImage().getWidth() <= width) {
+            if (inAirBullet && bullet.getPositionX() + bullet.getImage().getWidth() <= width && bullet.getPositionX() >= 0) {
                 gc.drawImage(bullet.getImage(), bullet.getPositionX(), bullet.getPositionY());
-                bullet.setPositionX(bullet.getPositionX() + 100);
+                bullet.setPositionX(bullet.getPositionX() + (right ? 100:-100));
             } else {
                 bullet.setPositionX(-3000);
                 inAirBullet = false;
             }
-        }
-        else {
-            if (inAirBullet && bullet.getPositionX() >= 0) {
-                gc.drawImage(bullet.getImage(), bullet.getPositionX(), bullet.getPositionY());
-                bullet.setPositionX(bullet.getPositionX() - 100);
-            } else {
-                bullet.setPositionX(-3000);
-                inAirBullet = false;
-            }
-        }
+
     }
 
     public static void main(String[] args) {launch();}
