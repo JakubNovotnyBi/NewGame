@@ -24,16 +24,34 @@ public class HelloApplication extends Application {
 
     //890px background
 
+    //reload time, moving diagonal, enemy
+
+
     Image firstPositionR = new Image("gangster1.png");
     Image secondPositionR = new Image("gangster2.png");
     Image firstPositionL = new Image("gangster3.png");
     Image secondPositionL = new Image("gangster4.png");
-    Image background = new Image("background.jpg");
+
+    Image firstPositionRHurt = new Image("gangster1Hurt.png");
+    Image secondPositionRHurt = new Image("gangster2Hurt.png");
+    Image firstPositionLHurt = new Image("gangster3Hurt.png");
+    Image secondPositionLHurt = new Image("gangster4Hurt.png");
+
+    Image firstPositionREnemy = new Image("enemy1.png");
+    Image secondPositionREnemy = new Image("enemy2.png");
+    Image firstPositionLEnemy = new Image("enemy3.png");
+    Image secondPositionLEnemy = new Image("enemy4.png");
+
+
+
     Image bulletImage = new Image("bullet.png");
     Image bulletImage2 = new Image("bullet2.png");
     Image ammoImage = new Image("ammo.png");
 
-    Player player = new Player(200,400);
+    Image gameOverImage = new Image("gameOverScreen.png");
+    Image background = new Image("background.jpg");
+    Player player = new Player(200,400, firstPositionR);
+    Player enemy = new Player(600, 400, firstPositionLEnemy);
     Bullet bullet = new Bullet(bulletImage, player.getPositionX()+player.getImage().getWidth(), player.getPositionY()+player.getImage().getHeight()/2);
     Bullet ammo = new Bullet(ammoImage, width - ammoImage.getWidth()-60, ammoImage.getHeight()-5);
 
@@ -45,6 +63,16 @@ public class HelloApplication extends Application {
     public final static int MINYPOS = 360;
     public final static int MAXAMMO = 9;
     private int currentAmmo = MAXAMMO;
+    public final static int MAXHEALTH = 100;
+    private int currentHealth = MAXHEALTH;
+    private int prevHealth = currentHealth;
+
+    Canvas canvas = new Canvas(width, height);
+    GraphicsContext gc = canvas.getGraphicsContext2D();
+    Timeline tl = new Timeline(new KeyFrame(Duration.millis(50), e -> run(gc)));
+    Timeline bulletTime = new Timeline(new KeyFrame(Duration.millis(10), e ->run1(gc)));
+    Timeline breathingTime = new Timeline(new KeyFrame(Duration.millis(100), e -> run2()));
+
 
     private boolean is2ndImage = true;
     private boolean is2ndImage2 = true;
@@ -56,16 +84,16 @@ public class HelloApplication extends Application {
         stage.setTitle("Shoot-game");
         stage.setResizable(false);
 
-        Canvas canvas = new Canvas(width, height);
         canvas.requestFocus();
 
-        GraphicsContext gc = canvas.getGraphicsContext2D();
 
-        Timeline tl = new Timeline(new KeyFrame(Duration.millis(250), e -> run(gc)));
+
+
         tl.setCycleCount(Timeline.INDEFINITE);
 
-        Timeline bulletTime = new Timeline(new KeyFrame(Duration.millis(10), e ->run1(gc)));
         bulletTime.setCycleCount(Timeline.INDEFINITE);
+
+        breathingTime.setCycleCount(Timeline.INDEFINITE);
 
         Scene scene = new Scene(new StackPane(canvas));
         scene.addEventHandler(KeyEvent.KEY_PRESSED, keyEvent -> {
@@ -100,6 +128,10 @@ public class HelloApplication extends Application {
                     }
                 }
             }
+            else if (keyEvent.getCode() == KeyCode.SPACE && keyEvent.getCode() == KeyCode.D){
+                System.out.println("Hello World");
+            }
+
             else if (keyEvent.getCode() == KeyCode.W ) {
                 if (player.getPositionY()-speed >= MINYPOS && !inAir)
                 player.setPositionY(player.getPositionY() - speed);
@@ -122,7 +154,13 @@ public class HelloApplication extends Application {
             else if (keyEvent.getCode() == KeyCode.R){
                 currentAmmo = MAXAMMO;
             }
+            else if (keyEvent.getCode() == KeyCode.P){
+                currentHealth = 0;
+            }
 
+            else if (keyEvent.getCode() == KeyCode.L){
+                currentHealth -= 5;
+            }
 
 
             else if (keyEvent.getCode() == KeyCode.CONTROL){
@@ -140,6 +178,7 @@ public class HelloApplication extends Application {
 
         });
             tl.play();
+            breathingTime.play();
             stage.setScene(scene);
             stage.show();
             stage.getIcons().add(new Image("icon.png"));
@@ -162,14 +201,7 @@ public class HelloApplication extends Application {
             xBackground = -1270;
         }
         gc.drawImage(background, xBackground, 0);
-        if (right) {
-            player.setImage(is2ndImage ? firstPositionR : secondPositionR);
-            is2ndImage = !is2ndImage;
-        }
-        else {
-            player.setImage(is2ndImage2 ? firstPositionL : secondPositionL);
-            is2ndImage2 = !is2ndImage2;
-        }
+
 
         if (inAir){
             vspeed += 2;
@@ -182,6 +214,7 @@ public class HelloApplication extends Application {
         }
 
         gc.drawImage(player.getImage(), player.getPositionX(), player.getPositionY());
+        gc.drawImage(enemy.getImage(), enemy.getPositionX(), enemy.getPositionY());
         gc.drawImage(ammo.getImage(), ammo.getPositionX(), ammo.getPositionY());
 
         //gc.drawImage(, 100, 200);
@@ -190,6 +223,7 @@ public class HelloApplication extends Application {
         gc.fillText("AMMO", ammo.getPositionX()-75, ammo.getPositionY()+15);
         gc.setFont(new Font(20));
         gc.fillText(currentAmmo+"/∞", ammo.getPositionX()+15, ammo.getPositionY()+15);
+
 
     }
     private void run1(GraphicsContext gc){
@@ -202,6 +236,35 @@ public class HelloApplication extends Application {
                 inAirBullet = false;
             }
 
+    }
+
+    private void run2(){
+        if (currentHealth == prevHealth) {
+            if (right) {
+                player.setImage(is2ndImage ? firstPositionR : secondPositionR);
+                is2ndImage = !is2ndImage;
+            } else {
+                player.setImage(is2ndImage2 ? firstPositionL : secondPositionL);
+                is2ndImage2 = !is2ndImage2;
+            }
+        }
+        else {
+            if (currentHealth == 0) {
+                gc.drawImage(gameOverImage, 0, 0, width, height);
+                tl.stop();
+                bulletTime.stop();
+                breathingTime.stop();
+            } else if (currentHealth < prevHealth) {
+                prevHealth = currentHealth;
+                if (right) {
+                    player.setImage(is2ndImage ? firstPositionRHurt : secondPositionRHurt);
+                    is2ndImage = !is2ndImage;
+                } else {
+                    player.setImage(is2ndImage2 ? firstPositionLHurt : secondPositionLHurt);
+                    is2ndImage2 = !is2ndImage2;
+                }
+            }
+        }
     }
 
     public static void main(String[] args) {launch();}
