@@ -138,9 +138,6 @@ public class HelloApplication extends Application {
                     }
                 }
             }
-            else if (keyEvent.getCode() == KeyCode.SPACE && keyEvent.getCode() == KeyCode.D){
-                System.out.println("Hello World");
-            }
 
             else if (keyEvent.getCode() == KeyCode.W ) {
                 if (player.getPositionY()-speed >= MINYPOS && !inAir)
@@ -174,7 +171,6 @@ public class HelloApplication extends Application {
 
 
             else if (keyEvent.getCode() == KeyCode.CONTROL){
-
                         if (!inAirBullet && currentAmmo > 0) {
                             inAirBullet = true;
                             bulletTime.play();
@@ -182,10 +178,7 @@ public class HelloApplication extends Application {
                             bullet.setPositionX(player.getPositionX() + (right ? player.getImage().getWidth() : -10));
                             bullet.setPositionY(player.getPositionY()+player.getImage().getHeight()/2);
                         }
-
-
             }
-
         });
             tl.play();
             breathingTime.play();
