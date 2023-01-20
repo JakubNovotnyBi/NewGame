@@ -42,6 +42,10 @@ public class HelloApplication extends Application {
     Image firstPositionLEnemy = new Image("enemy3.png");
     Image secondPositionLEnemy = new Image("enemy4.png");
 
+    Image firstPositionREnemyHurt = new Image("enemy1Hurt.png");
+    Image secondPositionREnemyHurt = new Image("enemy2Hurt.png");
+    Image firstPositionLEnemyHurt = new Image("enemy3Hurt.png");
+    Image secondPositionLEnemyHurt = new Image("enemy4Hurt.png");
 
 
     Image bulletImage = new Image("bullet.png");
@@ -67,16 +71,22 @@ public class HelloApplication extends Application {
     private int currentHealth = MAXHEALTH;
     private int prevHealth = currentHealth;
 
+    private int enemyHealth = MAXHEALTH-30;
+
     Canvas canvas = new Canvas(width, height);
     GraphicsContext gc = canvas.getGraphicsContext2D();
     Timeline tl = new Timeline(new KeyFrame(Duration.millis(50), e -> run(gc)));
-    Timeline bulletTime = new Timeline(new KeyFrame(Duration.millis(10), e ->run1(gc)));
+    Timeline bulletTime = new Timeline(new KeyFrame(Duration.millis(1), e ->run1(gc)));
     Timeline breathingTime = new Timeline(new KeyFrame(Duration.millis(100), e -> run2()));
 
 
     private boolean is2ndImage = true;
     private boolean is2ndImage2 = true;
+    private boolean is2ndImageEnemy = true;
+    private boolean is2ndImage2Enemy = true;
+
     private boolean right = true;
+    private boolean enemyRight = false;
     private boolean inAirBullet = false;
     private boolean inAir = false;
 
@@ -108,9 +118,9 @@ public class HelloApplication extends Application {
                 else {
                     xBackground+= speed;
                     if (xBackground == 0 || xBackground > 0 && player.getPositionX() > 0) {
-                        player.setPositionX(player.getPositionX() - speed * 4);
+                        player.setPositionX(player.getPositionX() - speed);
                     } else if (player.getPositionX() >= 957 - (speed * 12)) {
-                        player.setPositionX(player.getPositionX() - speed * 4);
+                        player.setPositionX(player.getPositionX() - speed);
                     }
                 }
             }
@@ -122,9 +132,9 @@ public class HelloApplication extends Application {
                 else {
                     xBackground -= speed;
                     if (xBackground == -1270 || xBackground == -1280 && player.getPositionX() < 957) {
-                        player.setPositionX(player.getPositionX() + speed * 4);
+                        player.setPositionX(player.getPositionX() + speed);
                     } else if (player.getPositionX() <= speed * 12) {
-                        player.setPositionX(player.getPositionX() + speed * 4);
+                        player.setPositionX(player.getPositionX() + speed);
                     }
                 }
             }
@@ -159,7 +169,7 @@ public class HelloApplication extends Application {
             }
 
             else if (keyEvent.getCode() == KeyCode.L){
-                currentHealth -= 5;
+                currentHealth -= 10;
             }
 
 
@@ -169,7 +179,7 @@ public class HelloApplication extends Application {
                             inAirBullet = true;
                             bulletTime.play();
                             currentAmmo--;
-                            bullet.setPositionX(player.getPositionX() + (right ? player.getImage().getWidth() : -15));
+                            bullet.setPositionX(player.getPositionX() + (right ? player.getImage().getWidth() : -10));
                             bullet.setPositionY(player.getPositionY()+player.getImage().getHeight()/2);
                         }
 
@@ -227,11 +237,27 @@ public class HelloApplication extends Application {
 
     }
     private void run1(GraphicsContext gc){
+            if (bullet.rect().getBoundsInParent().intersects(enemy.rect().getBoundsInParent())){
+                enemy.setPositionX(enemy.getPositionX()+5);
+                enemyHealth-= 10;
+                if (enemyRight) {
+                    enemy.setImage(is2ndImageEnemy ? firstPositionREnemyHurt : secondPositionREnemyHurt);
+                    is2ndImageEnemy = !is2ndImageEnemy;
+                } else {
+                    enemy.setImage(is2ndImage2Enemy ? firstPositionLEnemyHurt : secondPositionLEnemyHurt);
+                    is2ndImage2Enemy = !is2ndImage2Enemy;
+                }
 
-            if (inAirBullet && bullet.getPositionX() + bullet.getImage().getWidth() <= width && bullet.getPositionX() >= 0) {
+                enemy.setPositionX(enemyHealth <= 0 ? -3000 : enemy.getPositionX());
+                bullet.setPositionX(-3000);
+                inAirBullet = false;
+            }
+           else if (inAirBullet && bullet.getPositionX() + bullet.getImage().getWidth() <= width && bullet.getPositionX() >= 0) {
                 gc.drawImage(bullet.getImage(), bullet.getPositionX(), bullet.getPositionY());
-                bullet.setPositionX(bullet.getPositionX() + (right ? 100:-100));
-            } else {
+                bullet.setPositionX(bullet.getPositionX() + (right ? 1:-1));
+            }
+
+            else {
                 bullet.setPositionX(-3000);
                 inAirBullet = false;
             }
@@ -239,7 +265,7 @@ public class HelloApplication extends Application {
     }
 
     private void run2(){
-        if (currentHealth == prevHealth) {
+        if (currentHealth >= prevHealth) {
             if (right) {
                 player.setImage(is2ndImage ? firstPositionR : secondPositionR);
                 is2ndImage = !is2ndImage;
@@ -248,8 +274,9 @@ public class HelloApplication extends Application {
                 is2ndImage2 = !is2ndImage2;
             }
         }
+
         else {
-            if (currentHealth == 0) {
+            if (currentHealth <= 0) {
                 gc.drawImage(gameOverImage, 0, 0, width, height);
                 tl.stop();
                 bulletTime.stop();
@@ -265,6 +292,16 @@ public class HelloApplication extends Application {
                 }
             }
         }
+        if (enemyHealth > 0) {
+            if (enemyRight) {
+                enemy.setImage(is2ndImageEnemy ? firstPositionREnemy : secondPositionREnemy);
+                is2ndImage = !is2ndImage;
+            }   else {
+                enemy.setImage(is2ndImage2Enemy ? firstPositionLEnemy : secondPositionLEnemy);
+                is2ndImage2Enemy = !is2ndImage2Enemy;
+            }
+        }
+
     }
 
     public static void main(String[] args) {launch();}

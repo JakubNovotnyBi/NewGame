@@ -21,5 +21,5 @@ public class Bullet extends Entity{
         this.image = image;
     }
 
-    public Rectangle rec = new Rectangle(image.getWidth(),image.getHeight());
+    public Rectangle rect() { return new Rectangle(getPositionX(), getPositionY(), getImage().getWidth(), getImage().getHeight()); }
 }
